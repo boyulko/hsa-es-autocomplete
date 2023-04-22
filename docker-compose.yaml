@@ -1,0 +1,40 @@
+version: '3.6'
+services:
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.3
+    platform: linux/amd64
+    restart: always
+    environment:
+      - node.name=elasticsearch
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9200/_cluster/health" ]
+      interval: 15s
+      timeout: 5s
+      retries: 50
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    ports:
+      - "9300:9300"
+      - "9200:9200"
+
+
+  es:
+    container_name: es
+    build:
+      context: es
+      dockerfile: Dockerfile
+    image: es:latest
+    restart: always
+    ports:
+      - '127.0.0.1:8080:8080'
+    depends_on:
+      - elasticsearch
+
+
+volumes:
+  esdata1:
+    driver: local
